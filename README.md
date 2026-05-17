@@ -16,8 +16,7 @@ This project is a full-stack web application developed as part of the **Maincraf
 ## How to Run
 Follow these steps to run the project locally:
 
-1. **Clone the repository**:
-   Open your terminal or command prompt.
+1. **Clone the repository or download the zip file**:
    ```bash
    git clone https://github.com/lakshydev/Maincrafts-Java-Task1.git
 
