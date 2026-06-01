@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Contact Submissions</title>
+    <style>
+        /* Modern Dashboard Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            padding: 40px;
+            color: #333;
+        }
+
+        .dashboard-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f3f5;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .refresh-btn {
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background-color: #074a8a;
+        }
+
+        /* Table Design */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f3f5;
+            color: #495057;
+            padding: 15px;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            color: #495057;
+            font-size: 15px;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #adb5bd;
+            padding: 30px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="header-section">
+        <h2>Contact Management Dashboard</h2>
+        <button class="refresh-btn" onclick="fetchContacts()">🔄 Refresh Data</button>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th style="width: 10%;">ID</th>
+            <th style="width: 25%;">Full Name</th>
+            <th style="width: 25%;">Email Address</th>
+            <th style="width: 40%;">Message</th>
+        </tr>
+        </thead>
+        <tbody id="contactsTableBody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Function to fetch JSON array from Spring Boot API
+    async function fetchContacts() {
+        const tableBody = document.getElementById('contactsTableBody');
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading data...</td></tr>';
+
+        try {
+            // Fetching from your Task 2 endpoint
+            const response = await fetch('http://localhost:8080/contacts');
+
+            if (!response.ok) throw new Error("Failed to fetch data");
+
+            const contacts = await response.json();
+
+            // Clear placeholder text
+            tableBody.innerHTML = '';
+
+            if (contacts.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="no-data">No contact form submissions found.</td></tr>';
+                return;
+            }
+
+            // Loop through entries and construct HTML rows dynamically
+            contacts.forEach(contact => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>#${contact.id}</strong></td>
+                    <td>${escapeHTML(contact.name)}</td>
+                    <td>${escapeHTML(contact.email)}</td>
+                    <td>${escapeHTML(contact.message)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error("Error loading dashboard data:", error);
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #d63031; font-weight: bold;">Error: Could not sync with backend server. Make sure Spring Boot is running.</td></tr>';
+        }
+    }
+
+    // Helper function to prevent XSS injection attacks
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g,
+            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+    }
+
+    // Load data automatically when the page loads
+    window.onload = fetchContacts;
+</script>
+
+</body>
+</html>
